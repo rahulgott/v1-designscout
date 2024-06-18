@@ -1,0 +1,13 @@
+.testContainer {
+    height: calc(100svh - 60px);
+}
+
+.mainArea {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+}

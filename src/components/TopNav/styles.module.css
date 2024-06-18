@@ -1,0 +1,17 @@
+.topNav {
+    height: 60px;
+    display: flex;
+    flex-direction: row;
+    background-color: black;
+    justify-content: space-between;
+    padding: 0 20%;
+    align-items: center;
+}
+
+.logo {
+    height: 32px;
+}
+
+img {
+    height: 100%;
+}
