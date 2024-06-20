@@ -1,5 +1,7 @@
+import styles from './styles.module.css'
+
 export default function Timer() {
   return (
-    <div>Timer</div>
+    <div className={styles.timer}>Timer</div>
   )
 }

@@ -9,8 +9,6 @@ interface ButtonProps {
 
 export default function Button({text, color, size, onClick}: ButtonProps) {
   return (
-    <div>
-        <button onClick={onClick}>{text}</button>
-    </div>
+    <button className={styles.button} onClick={onClick}>{text}</button>
   )
 }

@@ -14,9 +14,13 @@ export default function QuestionContainer() {
                 <span>Question 1</span>
                 <p>What would you change to increase user engagement?</p>
             </div>
-            <div>
-                <Timer />
-                <Button text={"Submit"} size={"md"} color={"primary"} onClick={handleTestSubmit}/>
+            <div className={styles.interactive}>
+                <div>
+                    <Timer />
+                    </div>
+                <div>
+                    <Button text={"Submit"} size={"md"} color={"primary"} onClick={handleTestSubmit}/>
+                </div>
             </div>
         </div>
   )
