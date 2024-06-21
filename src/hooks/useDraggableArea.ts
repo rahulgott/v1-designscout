@@ -23,16 +23,35 @@ export function useDraggableArea() {
 
 
     const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        setStartPosition({
-        x: e.clientX - rect.left - scrollLeft,
-        y: e.clientY - rect.top - scrollTop,
-        });
-        setIsDragging(true)
-        setCurrentRect(null)
-    }, []);
+        const target = e.target as HTMLElement;
+        const inputArea = target.closest('.input-area'); // Assuming you add a class to identify input areas
+    
+        // Click is outside and input is visible
+        if (inputVisible && !inputArea) {
+            if (inputValue.trim() !== "") {
+                submitComment(inputValue); // Submit if there's text
+            } else {
+                // Optionally handle empty input cases, e.g., removing an unfinished rectangle
+                if (selectedRectIndex != null) {
+                    setRectangles(prev => prev.filter((_, index) => index !== selectedRectIndex));
+                }
+            }
+            setInputVisible(false);
+            setInputValue("");
+        } else {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            setStartPosition({
+                x: e.clientX - rect.left - scrollLeft,
+                y: e.clientY - rect.top - scrollTop,
+            });
+            setIsDragging(true);
+            setCurrentRect(null); // Reset current rectangle
+        }
+    }, [inputVisible, inputValue, setInputVisible, setInputValue]);
+    
+    
 
     const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!isDragging || !startPosition) return;
@@ -60,53 +79,53 @@ export function useDraggableArea() {
     
     const onMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (currentRect && (currentRect.width > 12 || currentRect.height > 12)) {
-            setRectangles(prev => {
-                return [...prev, currentRect];
+            setRectangles(prev => [...prev, {...currentRect, comment: inputValue, index: prev.length}]);
+            setSelectedRectIndex(rectangles.length);
+            setInputPosition({
+                x: e.clientX - e.currentTarget.getBoundingClientRect().left,
+                y: e.clientY - e.currentTarget.getBoundingClientRect().top
             });
-            const rect = e.currentTarget.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
-            const x = e.clientX - rect.left - scrollLeft
-            const y = e.clientY - rect.top - scrollTop
-    
-            setInputPosition({ x, y })
-            setInputVisible(true)
+            setInputVisible(true);
+            setInputValue(""); // Clear input after setting
         }
         setIsDragging(false);
         setCurrentRect(null);
         setStartPosition(null);
-        setRectIndex(rectIndex + 1)
-    }, [currentRect]);
+        setRectIndex(rectIndex + 1);
+    }, [currentRect, inputValue, rectangles.length, rectIndex]);
+    
+    
     
 
     const submitComment = useCallback((comment: string) => {
-        if (rectangles) {
+        if (rectangles && comment.trim() !== "") {
             setRectangles(prev => {
+                // Update rectangles array by mapping through and adjusting only the selected rectangle
                 const updatedRectangles = prev.map((rect, index) => {
-                    if (index === rectIndex - 1 || index === selectedRectIndex) {
-                        return { ...rect, comment, time: Date.now() }
+                    if (index === selectedRectIndex) { // Check if the current rectangle is the selected one
+                        return { ...rect, comment: comment, time: Date.now() }; // Update comment and time
                     }
-                    return rect
-                })
-                return updatedRectangles
+                    return rect; // Return unchanged rectangles
+                });
+                return updatedRectangles;
             });
-            setInputVisible(false)
+            setInputVisible(false); // Close the input field after updating
         }
-    }, [selectedRectIndex, rectangles])
+    }, [selectedRectIndex, rectangles]);
     
     
 
     const showInputOnClick = useCallback((index: number) => {
-        const rect = rectangles[index]
+        const rect = rectangles[index];
         if (rect) {
-            setInputPosition({ x: rect.x + rect.width, y: rect.y + rect.height })
-            setInputVisible(true)
-            setSelectedRectIndex(index)
-            setInputValue(rect.comment)
+            setInputPosition({ x: rect.x + rect.width, y: rect.y + rect.height });
+            setInputVisible(true);
+            setSelectedRectIndex(index);
+            setInputValue(rect.comment); // Set inputValue when an existing rectangle is clicked
         }
     }, [rectangles]);
     
     
 
-    return { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, };
+    return { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex};
 }
