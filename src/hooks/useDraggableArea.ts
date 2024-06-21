@@ -19,6 +19,7 @@ export function useDraggableArea() {
     const [inputPosition, setInputPosition] = useState({ x: 0, y: 0 });
     const [rectIndex, setRectIndex] = useState<number>(0);
     const [selectedRectIndex, setSelectedRectIndex] = useState<number | null>(null);
+    const [inputValue, setInputValue] = useState("");
 
 
     const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -63,13 +64,13 @@ export function useDraggableArea() {
                 return [...prev, currentRect];
             });
             const rect = e.currentTarget.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-            const x = e.clientX - rect.left - scrollLeft;
-            const y = e.clientY - rect.top - scrollTop;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+            const x = e.clientX - rect.left - scrollLeft
+            const y = e.clientY - rect.top - scrollTop
     
-            setInputPosition({ x, y });
-            setInputVisible(true);
+            setInputPosition({ x, y })
+            setInputVisible(true)
         }
         setIsDragging(false);
         setCurrentRect(null);
@@ -79,29 +80,33 @@ export function useDraggableArea() {
     
 
     const submitComment = useCallback((comment: string) => {
-        console.log(rectangles)
         if (rectangles) {
             setRectangles(prev => {
-                console.log("prev 1: ", prev)
-                prev.push({...rectangles[rectIndex], comment})
-                console.log("prev 2: ", prev)
-                return prev;
-            })
-            setInputVisible(false);
+                const updatedRectangles = prev.map((rect, index) => {
+                    if (index === rectIndex - 1 || index === selectedRectIndex) {
+                        return { ...rect, comment, time: Date.now() }
+                    }
+                    return rect
+                })
+                return updatedRectangles
+            });
+            setInputVisible(false)
         }
-    }, [selectedRectIndex, rectangles]);
+    }, [selectedRectIndex, rectangles])
+    
     
 
-    const showInputOnClick = useCallback((index: any) => {
-        const rect = rectangles[index];
-        console.log(rect)
+    const showInputOnClick = useCallback((index: number) => {
+        const rect = rectangles[index]
         if (rect) {
-            setInputPosition({ x: rect.x + rect.width, y: rect.y + rect.height });
-            setInputVisible(true);
-            setSelectedRectIndex(index);
+            setInputPosition({ x: rect.x + rect.width, y: rect.y + rect.height })
+            setInputVisible(true)
+            setSelectedRectIndex(index)
+            setInputValue(rect.comment)
         }
     }, [rectangles]);
     
+    
 
-    return { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick };
+    return { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, };
 }

@@ -8,8 +8,7 @@ interface ImageCardProps {
 }
 
 export default function ImageCard({ src, altText }: ImageCardProps ) {
-  const [inputValue, setInputValue] = useState("");
-  const { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick } = useDraggableArea();
+  const { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, } = useDraggableArea();
 
   return (
     <>
@@ -60,21 +59,24 @@ export default function ImageCard({ src, altText }: ImageCardProps ) {
         )}
         {inputVisible && (
           <form 
-              onSubmit={(e) => {
-                  e.preventDefault();
-
-                  submitComment(inputValue);
-                  setInputVisible(false);
-                  setInputValue("");
-              }}
-              style={{
-                  position: 'absolute',
-                  left: `${inputPosition.x}px`,
-                  top: `${inputPosition.y - 10}px`,
-              }}>
+            onSubmit={(e) => {
+                e.preventDefault();
+                submitComment(inputValue);
+                setInputVisible(false);
+                setInputValue("");  // Optionally clear the input after submitting
+            }}
+            style={{
+                position: 'absolute',
+                left: `${inputPosition.x}px`,
+                top: `${inputPosition.y - 10}px`,
+            }}>
               <input
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={(e) => {
+                    console.log(e.target.value)
+                    setInputValue(e.target.value)
+
+                  }}
                   placeholder='Enter your thoughts'
                   autoFocus
                   type="text"
@@ -86,8 +88,9 @@ export default function ImageCard({ src, altText }: ImageCardProps ) {
                       color: "black",
                   }}
               />
-              <button type='submit'>Click</button>
+            <button type='submit'>Submit</button>
           </form>
+      
       )}
       </div>
     </>
