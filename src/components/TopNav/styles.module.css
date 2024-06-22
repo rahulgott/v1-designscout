@@ -2,16 +2,24 @@
     height: 60px;
     display: flex;
     flex-direction: row;
-    background-color: black;
     justify-content: space-between;
-    padding: 0 20%;
     align-items: center;
-}
+    color: black;
+    padding: 1rem 1rem 0 1rem;
+    gap: 1rem;
 
-.logo {
-    height: 32px;
-}
+    .topNav1 {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+        background-color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+    }
 
-img {
-    height: 100%;
+    .topNav2 {
+        display: flex;
+        flex-grow: 1;
+    }
 }

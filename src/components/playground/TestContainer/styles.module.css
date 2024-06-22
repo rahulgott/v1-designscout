@@ -1,19 +1,12 @@
 .testContainer {
-    height: calc(100svh - 60px);
+    height: calc(100svh - 100px);
     user-select: none;
-}
 
-.mainArea {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-
-    .sideNav {
-        position: absolute;
-        left: 0;
-        width: 15%;
-        height: calc(100% - 60px);
+    .mainArea {
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
     }
 }

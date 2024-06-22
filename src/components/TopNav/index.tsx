@@ -1,18 +1,24 @@
 import styles from './styles.module.css'
-import logo from '../../../src/assets/logo.png'
-import HamburgerMenu from '../ui/HamburgerMenu'
+import QuestionContainer from '../playground/QuestionContainer'
+import Timer from '../ui/Timer'
+import DropdownMenu from '../ui/DropdownMenu'
 
 export default function TopNav() {
 
+  const assessmentName:string = "AirBnB UX Design Assessment"
+
   return (
     <div className={styles.topNav}>
-      <div className={styles.logo}>
-        <img src={logo} alt="designscout logo" />
+      <div className={styles.topNav1}>
+        <DropdownMenu />
+        <div className="question-area">{assessmentName}</div>
       </div>
-      <div className="question-area">
-        Junior UX Design Assessment 
+      <div className={styles.topNav2}>
+        <QuestionContainer />
       </div>
-      <HamburgerMenu />
+      <div className={styles.topNav3}>
+        <Timer />
+      </div>
     </div>
   )
 }
