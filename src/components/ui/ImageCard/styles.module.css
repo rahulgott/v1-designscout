@@ -4,6 +4,7 @@
     height: 90%;
     margin-bottom: 1rem;
     user-select: none;
+    cursor: crosshair;
 }
 
 .image {
