@@ -4,6 +4,9 @@
     height: 100%;
     margin-bottom: 1rem;
     user-select: none;
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
 }
 
 .image {
@@ -11,4 +14,5 @@
     height: 80svh;
     object-fit: cover;
     user-select: none;
+    border: 2px solid #a58fff84 ;
 }
