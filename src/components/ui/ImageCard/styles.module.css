@@ -1,14 +1,14 @@
 .card {
     display: flex;
     overflow: hidden;
-    height: 90%;
+    height: 100%;
     margin-bottom: 1rem;
     user-select: none;
 }
 
 .image {
     width: auto;
-    height: 75vh;
+    height: 80svh;
     object-fit: cover;
     user-select: none;
 }
