@@ -1,0 +1,28 @@
+.leftNav {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 1rem;
+    justify-content: center;
+    height: 100%;
+    border-radius: 6px;
+
+    div {
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        padding: 1rem;
+
+        button {
+            border: 0;
+            padding: 0;
+            margin: 0;
+        }
+    }
+
+    
+
+    .selected {
+        background-color: #7C5AFF;
+    }
+}

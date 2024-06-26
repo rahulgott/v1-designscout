@@ -1,7 +1,7 @@
 import styles from './styles.module.css'
-import QuestionContainer from '../playground/QuestionContainer'
-import Timer from '../ui/Timer'
-import DropdownMenu from '../ui/DropdownMenu'
+import QuestionContainer from '../../playground/QuestionContainer'
+import Timer from '../../ui/Timer'
+import DropdownMenu from '../../ui/DropdownMenu'
 
 export default function TopNav() {
 

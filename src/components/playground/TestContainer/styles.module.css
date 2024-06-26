@@ -1,6 +1,9 @@
 .testContainer {
     height: calc(100svh - 100px);
     user-select: none;
+    position: absolute;
+    top: 10%;
+    left: 35%;
 
     .mainArea {
         height: 100%;

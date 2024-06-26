@@ -27,6 +27,7 @@ export function useDraggableArea() {
         const target = e.target as HTMLElement;
         const inputArea = target.closest('.input-area') // Assuming you add a class to identify input areas
     
+        console.log(inputArea)
         // Click is outside and input is visible
         if(!inputArea) {
             if (inputVisible) {
