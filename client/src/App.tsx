@@ -1,4 +1,5 @@
 import './App.css'
+import CandidateInterface from './components/candidate-view/candidate-interface'
 import LeftNav from './components/nav/LeftNav'
 import RightNav from './components/nav/RightNav'
 import TopNav from './components/nav/TopNav'
@@ -8,10 +9,13 @@ function App() {
 
   return (
     <div style={{height: "100svh"}}>
-      <TopNav />
+      {/* <TopNav />
       <LeftNav />
-      <RightNav />
-      <TestContainer />
+      <RightNav /> */}
+      
+      {/* <TestContainer /> */}
+
+      < CandidateInterface />
     </div>
   )
 }

@@ -9,8 +9,8 @@ interface ImageCardProps {
 }
 
 export default function ImageCard({ src, altText }: ImageCardProps ) {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex } = useDraggableArea();
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const {
     transcript,
     listening,
