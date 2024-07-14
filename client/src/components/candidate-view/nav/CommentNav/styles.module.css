@@ -1,0 +1,26 @@
+.commentNav {
+        position: fixed;
+        top: 5.5rem;
+        right: 1rem;
+        width: 280px;
+        height: calc(100svh - 6.5rem);
+        background-color: white;
+        color: black;
+        border-radius: 12px;
+
+        .navHeader{
+                display: inline-flex;
+                align-items: center;
+                justify-content: flex-start;
+                flex-direction: row;
+                gap: 1rem;
+                padding: 1rem;
+
+                h3 {
+                        font-size: 1.2rem;
+                        font-weight: 600;
+                        margin: 0 0 0 0.5rem;
+                        display: inline-flex;
+                }
+        }
+}

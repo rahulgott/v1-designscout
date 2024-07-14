@@ -14,8 +14,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use('/api/s3', s3Routes);
 
-console.log(process.env.REACT_APP_AWS_BUCKET_NAME)
-
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

@@ -12,9 +12,6 @@ AWS.config.update({
     const s3 = new AWS.S3();
 
 exports.uploadImageToS3 = async (req, res) => {
-        console.log("LOG: inside uploadImage function")
-        console.log("LOG: FILE: ", req)
-
         if (!req.file) {
             return res.status(400).send('No file uploaded');
         }

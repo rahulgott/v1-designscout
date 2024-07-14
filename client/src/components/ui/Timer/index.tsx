@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import styles from './styles.module.css'
 
-export default function Timer() {
-    const [secondsLeft, setSecondsLeft] = useState(3600)
+export default function Timer({timerMinutes}: {timerMinutes: number}) {
+    const timeLimit = timerMinutes * 60
+    const [secondsLeft, setSecondsLeft] = useState(timeLimit)
 
     useEffect(() => {
         const timerId = setInterval(() => {

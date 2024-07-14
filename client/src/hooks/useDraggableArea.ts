@@ -25,6 +25,7 @@ export function useDraggableArea() {
     const [rectIndex, setRectIndex] = useState<number>(0)
     const [selectedRectIndex, setSelectedRectIndex] = useState<number | null>(null)
     const [inputValue, setInputValue] = useState("")
+    const [imageUploaded, setImageUploaded] = useState(false);
     const [recentImageUrl, setRecentImageUrl] = useState<string | null>()
 
     const screenshotRef = useRef<HTMLDivElement>(null)
@@ -32,7 +33,7 @@ export function useDraggableArea() {
 
     useEffect(() => {
         console.log("Rectangles", rectangles)
-    }, [rectangles])
+    }, [rectangles])      
 
     const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLElement;
@@ -40,7 +41,6 @@ export function useDraggableArea() {
     
         // Click is outside and input is visible
         if(!inputArea) {
-            console.log("clicked outside")
             if (inputVisible) {
                 if (inputValue.trim() !== "") {
                     submitComment(inputValue) // Submit if there's text
@@ -50,7 +50,6 @@ export function useDraggableArea() {
                         setRectangles(prev => prev.filter((_, index) => index !== selectedRectIndex))
                     }
                 }
-                console.log("input visible and now set to false")
 
                 setInputVisible(false)
                 setCurrentRect(null)
@@ -137,60 +136,65 @@ export function useDraggableArea() {
 
     const takeScreenshot = useCallback(async () => {
         if (!screenshotRef.current || !currentRect || !startPosition || !endPosition) return;
-    
+      
         const rect = screenshotRef.current.getBoundingClientRect();
         const offsetX = (Math.min(startPosition.x, endPosition.x) - rect.left) * devicePixelRatio;
         const offsetY = (Math.min(startPosition.y, endPosition.y) - rect.top) * devicePixelRatio;
         const width = Math.abs(endPosition.x - startPosition.x) * devicePixelRatio;
         const height = Math.abs(endPosition.y - startPosition.y) * devicePixelRatio;
-    
+      
         const dataUrl = await toPng(screenshotRef.current);
         const cropCanvas = document.createElement('canvas');
         const ctx = cropCanvas.getContext('2d');
         if (ctx) {
-            const img = new Image();
-            img.onload = async () => {
-                cropCanvas.width = width;
-                cropCanvas.height = height;
-                ctx.drawImage(img, offsetX, offsetY, width, height, 0, 0, width, height);
-                cropCanvas.toBlob(async (blob) => {
-                    if(blob) {
-                        try {
-                            const data = await uploadImage(blob);
-                            if(data && data.url) {
-                                setRecentImageUrl(data.url)
-                            }
-                        } catch (error) {
-                            console.error('Error handling in UI:', error);
-                        }
-                    }
-                }, 'image/png');
-            };
-            img.src = dataUrl;
+          const img = new Image();
+          img.onload = async () => {
+            cropCanvas.width = width;
+            cropCanvas.height = height;
+            ctx.drawImage(img, offsetX, offsetY, width, height, 0, 0, width, height);
+            cropCanvas.toBlob(async (blob) => {
+              if (blob) {
+                try {
+                  const data = await uploadImage(blob);
+                  if (data && data.url) {
+                    setRecentImageUrl(data.url);
+                    setImageUploaded(true); // Set the flag when upload is successful
+                  }
+                } catch (error) {
+                  console.error('Error uploading image to S3:', error);
+                  setImageUploaded(false);
+                }
+              }
+            }, 'image/png');
+          };
+          img.src = dataUrl;
         } else {
-            throw new Error("Failed to get drawing context from canvas");
+          throw new Error("Failed to get drawing context from canvas");
         }
     }, [screenshotRef, currentRect, startPosition, endPosition, devicePixelRatio]);
-    
-    
-    const submitComment = useCallback((comment: string) => {
-        if (comment.trim() !== "") {
+      
+
+    const submitComment = useCallback((inputValue: string) => {
+        if (inputValue.trim() !== "" && selectedRectIndex != null) {
             setRectangles(prev => {
                 const updatedRectangles = prev.map((rect, index) => {
-                    if (index === selectedRectIndex) {
-                        return {...rect, comment, imageUrl: recentImageUrl, time: Date.now()};
+                    if (index === selectedRectIndex && !imageUploaded) {
+                        return {...rect, comment: inputValue, time: Date.now()};
+                    }
+                    if (index === selectedRectIndex && imageUploaded && recentImageUrl) {
+                        return {...rect, comment: inputValue, imageUrl: recentImageUrl, time: Date.now()};
                     }
                     return rect;
                 });
                 return updatedRectangles;
             });
             setInputVisible(false);
+            setCurrentRect(null);
+            setImageUploaded(false); // Reset the flag
+            setInputValue(""); // Clear the input
         }
-        setCurrentRect(null)
-    }, [selectedRectIndex]);
-    
-    
-    
+    }, [inputValue, imageUploaded, recentImageUrl, selectedRectIndex]);
+      
 
     const showInputOnClick = useCallback((index: number) => {
         const rect = rectangles[index]
@@ -204,5 +208,5 @@ export function useDraggableArea() {
     
     
 
-    return { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef}
+    return { rectangles, currentRect, setCurrentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef}
 }

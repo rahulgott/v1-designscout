@@ -3,8 +3,8 @@ import { useDraggableArea } from "../../../hooks/useDraggableArea";
 import styles from "./styles.module.css"
 import { useRef, useEffect } from "react";
 
-export default function CanvasArea({ imageMockup}: {imageMockup: string}) {
-    const { rectangles, currentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef } = useDraggableArea();
+export default function CanvasArea({ imageMockup, questionIndex}: {imageMockup: string, questionIndex: number}) {
+    const { rectangles, currentRect, setCurrentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef } = useDraggableArea();
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const {
       transcript,
@@ -32,6 +32,11 @@ export default function CanvasArea({ imageMockup}: {imageMockup: string}) {
           textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`; // Set height based on content
       }
     }, [inputValue]);
+
+    useEffect(() => {
+        setInputVisible(false)
+        setCurrentRect(null)
+    }, [questionIndex])
     
     
     return (
@@ -83,7 +88,7 @@ export default function CanvasArea({ imageMockup}: {imageMockup: string}) {
                     onSubmit={(e) => {
                         e.preventDefault()
                         if(inputValue) {
-                        submitComment(inputValue)
+                            submitComment(inputValue)
                         }
                         setInputVisible(false)
                         setInputValue("")
