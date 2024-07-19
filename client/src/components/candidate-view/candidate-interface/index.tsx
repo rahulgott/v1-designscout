@@ -7,6 +7,8 @@ import LeftNav from '../nav/LeftNav'
 import Timer from '../../ui/Timer'
 import CommentNav from '../nav/CommentNav'
 import { useQuestion } from '../../../contexts/questionContext'
+import ToolBarNav from '../nav/ToolBarNav'
+import InstructionsNav from '../nav/Instructions'
 
 export default function CandidateInterface() {
   const { currentQuestion } = useQuestion();
@@ -91,8 +93,10 @@ export default function CandidateInterface() {
 
       <HeadingNav assessmentName={mockData.assessmentName} />
       <LeftNav  assessmentInfo={mockData.assessmentInfo} />
+      <InstructionsNav />
       <Timer timerMinutes={mockData.timeLimit}/>
       <CommentNav />
+      <ToolBarNav />
       <CanvasArea imageMockup={mockData.assessmentInfo[currentQuestion].imageMockup} />
     </div>
   )

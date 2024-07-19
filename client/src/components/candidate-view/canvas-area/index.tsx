@@ -43,8 +43,6 @@ export default function CanvasArea({ imageMockup }: {imageMockup: string}) {
     
     return (
         <>
-            {console.log("currentQuestion in canvasArea: ", currentQuestion)}
-            {console.log("commentData: ", commentData)}
             {commentData?.data[currentQuestion]?.commentData?.map((rect, index) => (
                 <div key={index}>
                     {selectedRectIndex === index && (
@@ -191,7 +189,9 @@ export default function CanvasArea({ imageMockup }: {imageMockup: string}) {
                 onMouseUp={onMouseUp}
                 ref={screenshotRef}
             >
-                <img src={imageMockup} alt=""  draggable="false" />
+                <div className={styles.imageContainer}>
+                    <img src={imageMockup} alt=""  draggable="false" />
+                </div>
             </div>
         </>
         

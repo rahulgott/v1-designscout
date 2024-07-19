@@ -36,10 +36,10 @@ export interface Rectangle {
 export interface Comment {
     index: number;
     displayOrder: number;
-    x: string;
-    y: string;
-    width: string;
-    height: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
     imageUrl: string;
     comment: string;
     lastUpdated: number;

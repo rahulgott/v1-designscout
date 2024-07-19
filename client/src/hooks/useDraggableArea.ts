@@ -2,13 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import SpeechRecognition from 'react-speech-recognition';
 import { toPng } from 'html-to-image';
 import { uploadImage } from '../api/apiService';
-import { Comment, MockCommentData, Rectangle } from '../interfaces/types';
+import { Comment, Rectangle } from '../interfaces/types';
 import { useQuestion } from '../contexts/questionContext';
 
 export function useDraggableArea() {
     const { currentQuestion, commentData, setCommentData } = useQuestion();
-    const [rectangles, setRectangles] = useState<Rectangle[]>([])
-    const [currentRect, setCurrentRect] = useState<Rectangle | null>(null)
+    const [rectangles, setRectangles] = useState<Comment[]>([])
+    const [currentRect, setCurrentRect] = useState<Comment | null>(null)
     const [isDragging, setIsDragging] = useState(false)
     const [startPosition, setStartPosition] = useState<{ x: number; y: number } | null>(null)
     const [endPosition, setEndPosition] = useState<{ x: number; y: number } | null>(null)
@@ -27,21 +27,25 @@ export function useDraggableArea() {
     useEffect(() => {
         // Initialize comment data for the current question if it doesn't exist
         setCommentData((prev) => {
-          const existingData = prev.data.find((item: { index: number}) => item.index === currentQuestion);
-          if (!existingData) {
-            return {
-              ...prev,
-              data: [
-                ...prev.data,
-                { index: currentQuestion, commentData: [] },
-              ],
-            };
-          }
-          return prev;
+            const existingData = prev.data.find((item: { index: number}) => item.index === currentQuestion);
+            if (!existingData) {
+                return {
+                    ...prev,
+                    data: [
+                        ...prev.data,
+                        { index: currentQuestion, commentData: [] },
+                    ],
+                };
+            }
+            return prev;
         });
 
-        // console.log("~~~~~~~~~ COMMENT DATA: ", commentData)
-      }, [currentQuestion]);
+        setRectangles(commentData.data.find(item => item.index === currentQuestion)?.commentData || [])
+    }, [currentQuestion]);
+
+    useEffect(()=> {
+        console.log(rectangles, commentData)
+    }, [rectangles, commentData])
 
     const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLElement;
@@ -62,6 +66,7 @@ export function useDraggableArea() {
                 setInputVisible(false)
                 setCurrentRect(null)
                 setInputValue("")
+                setSelectedRectIndex(null);
             } else {
                 const rect = e.currentTarget.getBoundingClientRect()
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop
@@ -90,14 +95,10 @@ export function useDraggableArea() {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
         const currentX = e.clientX - rect.left - scrollLeft
         const currentY = e.clientY - rect.top - scrollTop
-    
         const width = Math.abs(currentX - startPosition.x)
         const height = Math.abs(currentY - startPosition.y)
         
-        setEndPosition({
-            x: currentX,
-            y: currentY,
-        });
+        setEndPosition({ x: e.clientX, y: e.clientY });
     
         if (width > 12 || height > 12) {
             setCurrentRect({
@@ -105,10 +106,11 @@ export function useDraggableArea() {
                 y: Math.min(startPosition.y, currentY),
                 width: width,
                 height: height,
-                comment: "",
-                time: Date.now(),
                 index: rectIndex,
-                imageUrl: ""
+                displayOrder: rectIndex,
+                imageUrl: "",
+                comment: "",
+                lastUpdated: Date.now(),
             })
         }
     }, [isDragging, startPosition])
@@ -125,10 +127,24 @@ export function useDraggableArea() {
             setEndPosition({
                 x: currentRect.x + currentRect.width,
                 y: currentRect.y + currentRect.height,
-            });
+            })
+
             takeScreenshot()
-            setRectangles(prev => [...prev, {...currentRect, comment: inputValue, index: prev.length}])
+
+            setRectangles(prev => [...prev, {...currentRect, comment: inputValue, index: prev.length, displayOrder: prev.length}])
+
+            setCommentData(prev => {
+                const updatedData = prev.data.map(item => {
+                    if (item.index === currentQuestion) {
+                        return {...item, commentData: rectangles};
+                    }
+                    return item;
+                });
+                return {...prev, data: updatedData};
+            });
+
             setSelectedRectIndex(commentData.data[currentQuestion].commentData.length)
+
             setInputPosition({
                 x: e.clientX - e.currentTarget.getBoundingClientRect().left,
                 y: e.clientY - e.currentTarget.getBoundingClientRect().top
@@ -187,11 +203,13 @@ export function useDraggableArea() {
         if (inputValue.trim() !== "" && selectedRectIndex != null) {
             setRectangles(prev => {
                 const updatedRectangles = prev.map((rect, index) => {
-                    if (index === selectedRectIndex && !imageUploaded) {
-                        return {...rect, comment: inputValue, time: Date.now()};
-                    }
-                    if (index === selectedRectIndex && imageUploaded && recentImageUrl) {
-                        return {...rect, comment: inputValue, imageUrl: recentImageUrl, time: Date.now()};
+                    if (index === selectedRectIndex) {
+                        const newRect = {...rect, comment: inputValue, time: Date.now()};
+
+                        if (imageUploaded && recentImageUrl) {
+                            newRect.imageUrl = recentImageUrl;
+                        }
+                        return newRect;
                     }
                     return rect;
                 });
@@ -199,47 +217,12 @@ export function useDraggableArea() {
                 // Here we use the updated rectangles
                 setCommentData((prev) => {
                     const updatedData = prev.data.map((dataItem: { index: number; commentData: any[]; }) => {
-                    // Check if current data item is for the current question
-                    if (dataItem.index === currentQuestion) {
-                        let found = false;
-                        const updatedCommentData = dataItem.commentData.map((comment: Comment) => {
-                            // Update existing comment with the same index
-                            if (comment.index === selectedRectIndex) {
-                                found = true;
-                                return {
-                                    ...comment,
-                                    x: updatedRectangles[selectedRectIndex].x.toString(),
-                                    y: updatedRectangles[selectedRectIndex].y.toString(),
-                                    width: updatedRectangles[selectedRectIndex].width.toString(),
-                                    height: updatedRectangles[selectedRectIndex].height.toString(),
-                                    imageUrl: updatedRectangles[selectedRectIndex].imageUrl,
-                                    comment: updatedRectangles[selectedRectIndex].comment,
-                                    lastUpdated: Date.now(),
-                                };
-                            }
-                            return comment;
-                        });
-
-                        // If no existing comment with this index, add a new one
-                        if (!found) {
-                            updatedCommentData.push({
-                                index: selectedRectIndex,
-                                displayOrder: selectedRectIndex,
-                                x: updatedRectangles[selectedRectIndex].x.toString(),
-                                y: updatedRectangles[selectedRectIndex].y.toString(),
-                                width: updatedRectangles[selectedRectIndex].width.toString(),
-                                height: updatedRectangles[selectedRectIndex].height.toString(),
-                                imageUrl: updatedRectangles[selectedRectIndex].imageUrl,
-                                comment: updatedRectangles[selectedRectIndex].comment,
-                                lastUpdated: Date.now(),
-                            });
+                        // Check if current data item is for the current question
+                        if (dataItem.index === currentQuestion) {
+                            return {...dataItem, commentData: updatedRectangles};
                         }
-
-                        return {...dataItem, commentData: updatedCommentData};
-                    }
-                    return dataItem;
-                });
-    
+                        return dataItem;
+                    });
     
                     return { ...prev, data: updatedData };
                 });
@@ -251,8 +234,6 @@ export function useDraggableArea() {
             setCurrentRect(null);
             setImageUploaded(false); // Reset the flag
             setInputValue(""); // Clear the input
-
-            console.log("CurrentQuestion ON SUBMIT COMMENT: ", currentQuestion)
         }
     }, [inputValue, imageUploaded, recentImageUrl, selectedRectIndex, currentQuestion]);
     

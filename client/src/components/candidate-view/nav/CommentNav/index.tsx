@@ -12,6 +12,8 @@ export default function CommentNav() {
     return elapsedMinutes;
   };
 
+  console.log(commentData)
+
   return (
     <div className={styles.commentNav}>
       
@@ -24,22 +26,18 @@ export default function CommentNav() {
         </div>
       </div>
 
-      {/* <p>
-        {JSON.stringify(commentData)}
-      </p> */}
-
       <div className={styles.allComments}>
-        {commentData.data && commentData.data.map((entry, index) => (
+        {(commentData.data && commentData.data[0]?.commentData.length > 0) && commentData.data.map((entry, index) => (
           <div key={index} className={styles.commentModule}>
             <h4>Question {entry.index + 1}:</h4>
             {entry.commentData.map((comment, innerIndex) => (
               <div key={innerIndex} className={styles.commentEntry}>
-                <div className={styles.imgAndTimeContainer}>
+                {comment.imageUrl && (<div className={styles.imgAndTimeContainer}>
                   <div className={styles.imageDiv}>
                     <img src={comment.imageUrl} alt="" />
                   </div>
                   <p className={styles.elapsedTime}>{calculateElapsedMinutes(comment.lastUpdated)} minutes ago</p>
-                </div>
+                </div>)}
                 <p className={styles.comment}>{comment.comment}</p>
               </div>
             ))}
