@@ -22,17 +22,6 @@ export interface LeftNavProps {
     assessmentInfo: AssessmentInfo[];
 }
 
-export interface Rectangle {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    comment: string;
-    time: number;
-    index: number;
-    imageUrl?: any
-}
-
 export interface Comment {
     index: number;
     displayOrder: number;

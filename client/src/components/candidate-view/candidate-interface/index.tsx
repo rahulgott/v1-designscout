@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import CanvasArea from '../canvas-area'
 import { MockData } from '../../../interfaces/types'
 import styles from "./styles.module.css"

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import SpeechRecognition from 'react-speech-recognition';
 import { toPng } from 'html-to-image';
 import { uploadImage } from '../api/apiService';
-import { Comment, Rectangle } from '../interfaces/types';
+import { Comment } from '../interfaces/types';
 import { useQuestion } from '../contexts/questionContext';
 
 export function useDraggableArea() {
@@ -247,5 +247,5 @@ export function useDraggableArea() {
     
     
 
-    return { rectangles, currentRect, setCurrentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef, commentData}
+    return { currentRect, setCurrentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef, commentData}
 }

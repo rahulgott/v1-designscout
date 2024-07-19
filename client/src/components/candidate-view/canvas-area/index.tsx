@@ -6,7 +6,7 @@ import { useQuestion } from "../../../contexts/questionContext";
 
 export default function CanvasArea({ imageMockup }: {imageMockup: string}) {
     const { currentQuestion, commentData } = useQuestion();
-    const { rectangles, currentRect, setCurrentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef } = useDraggableArea();
+    const { currentRect, setCurrentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef } = useDraggableArea();
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const {
       transcript,
