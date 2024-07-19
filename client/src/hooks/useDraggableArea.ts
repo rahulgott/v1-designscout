@@ -2,19 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import SpeechRecognition from 'react-speech-recognition';
 import { toPng } from 'html-to-image';
 import { uploadImage } from '../api/apiService';
-
-interface Rectangle {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  comment: string;
-  time: number;
-  index: number;
-  imageUrl?: any
-}
+import { Comment, MockCommentData, Rectangle } from '../interfaces/types';
+import { useQuestion } from '../contexts/questionContext';
 
 export function useDraggableArea() {
+    const { currentQuestion, commentData, setCommentData } = useQuestion();
     const [rectangles, setRectangles] = useState<Rectangle[]>([])
     const [currentRect, setCurrentRect] = useState<Rectangle | null>(null)
     const [isDragging, setIsDragging] = useState(false)
@@ -31,9 +23,25 @@ export function useDraggableArea() {
     const screenshotRef = useRef<HTMLDivElement>(null)
     const devicePixelRatio = window.devicePixelRatio || 1;
 
+    
     useEffect(() => {
-        console.log("Rectangles", rectangles)
-    }, [rectangles])      
+        // Initialize comment data for the current question if it doesn't exist
+        setCommentData((prev) => {
+          const existingData = prev.data.find((item: { index: number}) => item.index === currentQuestion);
+          if (!existingData) {
+            return {
+              ...prev,
+              data: [
+                ...prev.data,
+                { index: currentQuestion, commentData: [] },
+              ],
+            };
+          }
+          return prev;
+        });
+
+        // console.log("~~~~~~~~~ COMMENT DATA: ", commentData)
+      }, [currentQuestion]);
 
     const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLElement;
@@ -120,7 +128,7 @@ export function useDraggableArea() {
             });
             takeScreenshot()
             setRectangles(prev => [...prev, {...currentRect, comment: inputValue, index: prev.length}])
-            setSelectedRectIndex(rectangles.length)
+            setSelectedRectIndex(commentData.data[currentQuestion].commentData.length)
             setInputPosition({
                 x: e.clientX - e.currentTarget.getBoundingClientRect().left,
                 y: e.clientY - e.currentTarget.getBoundingClientRect().top
@@ -131,7 +139,7 @@ export function useDraggableArea() {
         setIsDragging(false)
         setStartPosition(null)
         setRectIndex(rectIndex + 1)
-    }, [currentRect, inputValue, rectangles.length, rectIndex])
+    }, [currentRect, inputValue, commentData?.data[currentQuestion]?.commentData?.length, rectIndex])
 
 
     const takeScreenshot = useCallback(async () => {
@@ -171,6 +179,7 @@ export function useDraggableArea() {
         } else {
           throw new Error("Failed to get drawing context from canvas");
         }
+        console.log("currentQuestion while taking screenshot: ", currentQuestion)
     }, [screenshotRef, currentRect, startPosition, endPosition, devicePixelRatio]);
       
 
@@ -186,27 +195,80 @@ export function useDraggableArea() {
                     }
                     return rect;
                 });
+    
+                // Here we use the updated rectangles
+                setCommentData((prev) => {
+                    const updatedData = prev.data.map((dataItem: { index: number; commentData: any[]; }) => {
+                    // Check if current data item is for the current question
+                    if (dataItem.index === currentQuestion) {
+                        let found = false;
+                        const updatedCommentData = dataItem.commentData.map((comment: Comment) => {
+                            // Update existing comment with the same index
+                            if (comment.index === selectedRectIndex) {
+                                found = true;
+                                return {
+                                    ...comment,
+                                    x: updatedRectangles[selectedRectIndex].x.toString(),
+                                    y: updatedRectangles[selectedRectIndex].y.toString(),
+                                    width: updatedRectangles[selectedRectIndex].width.toString(),
+                                    height: updatedRectangles[selectedRectIndex].height.toString(),
+                                    imageUrl: updatedRectangles[selectedRectIndex].imageUrl,
+                                    comment: updatedRectangles[selectedRectIndex].comment,
+                                    lastUpdated: Date.now(),
+                                };
+                            }
+                            return comment;
+                        });
+
+                        // If no existing comment with this index, add a new one
+                        if (!found) {
+                            updatedCommentData.push({
+                                index: selectedRectIndex,
+                                displayOrder: selectedRectIndex,
+                                x: updatedRectangles[selectedRectIndex].x.toString(),
+                                y: updatedRectangles[selectedRectIndex].y.toString(),
+                                width: updatedRectangles[selectedRectIndex].width.toString(),
+                                height: updatedRectangles[selectedRectIndex].height.toString(),
+                                imageUrl: updatedRectangles[selectedRectIndex].imageUrl,
+                                comment: updatedRectangles[selectedRectIndex].comment,
+                                lastUpdated: Date.now(),
+                            });
+                        }
+
+                        return {...dataItem, commentData: updatedCommentData};
+                    }
+                    return dataItem;
+                });
+    
+    
+                    return { ...prev, data: updatedData };
+                });
+    
                 return updatedRectangles;
             });
+    
             setInputVisible(false);
             setCurrentRect(null);
             setImageUploaded(false); // Reset the flag
             setInputValue(""); // Clear the input
+
+            console.log("CurrentQuestion ON SUBMIT COMMENT: ", currentQuestion)
         }
-    }, [inputValue, imageUploaded, recentImageUrl, selectedRectIndex]);
+    }, [inputValue, imageUploaded, recentImageUrl, selectedRectIndex, currentQuestion]);
+    
       
 
     const showInputOnClick = useCallback((index: number) => {
-        const rect = rectangles[index]
+        const rect = commentData.data[currentQuestion].commentData[index]
         if (rect) {
-            setInputPosition({ x: rect.x + rect.width, y: rect.y + rect.height })
+            setInputPosition({ x: +rect.x + +rect.width, y: +rect.y + +rect.height })
             setInputVisible(true)
             setSelectedRectIndex(index)
             setInputValue(rect.comment) // Set inputValue when an existing rectangle is clicked
         }
-    }, [rectangles])
+    }, [commentData?.data[currentQuestion]?.commentData])
     
     
 
-    return { rectangles, currentRect, setCurrentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef}
+    return { rectangles, currentRect, setCurrentRect, onMouseDown, onMouseMove, onMouseUp, inputVisible, setInputVisible, inputPosition, submitComment, showInputOnClick, inputValue, setInputValue, selectedRectIndex, screenshotRef, commentData}
 }

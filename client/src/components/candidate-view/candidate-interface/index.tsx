@@ -6,9 +6,10 @@ import HeadingNav from '../nav/HeadingNav'
 import LeftNav from '../nav/LeftNav'
 import Timer from '../../ui/Timer'
 import CommentNav from '../nav/CommentNav'
+import { useQuestion } from '../../../contexts/questionContext'
 
 export default function CandidateInterface() {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const { currentQuestion } = useQuestion();
 
   const mockData: MockData = {
     assessmentName: "AirBnB Product Design Intern Assessment",
@@ -81,27 +82,18 @@ export default function CandidateInterface() {
   return (
     <div className={styles.candidateInterface}>
     {/* 
-      Checck state of question selection here. 
+      Check state of question selection here. 
       Props to pass: 
         - product brief and question for left nav,
         - image for canvas area
         - all comments for right nav   
     */}
 
-    
-
-
       <HeadingNav assessmentName={mockData.assessmentName} />
-      <LeftNav  assessmentInfo={mockData.assessmentInfo}
-                currentQuestion={currentQuestion}
-                setCurrentQuestion={setCurrentQuestion}
-      />
+      <LeftNav  assessmentInfo={mockData.assessmentInfo} />
       <Timer timerMinutes={mockData.timeLimit}/>
       <CommentNav />
-      
-      <CanvasArea imageMockup={mockData.assessmentInfo[currentQuestion].imageMockup} 
-                  questionIndex={currentQuestion}
-      />
+      <CanvasArea imageMockup={mockData.assessmentInfo[currentQuestion].imageMockup} />
     </div>
   )
 }
