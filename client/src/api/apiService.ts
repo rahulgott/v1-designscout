@@ -4,7 +4,7 @@ interface UploadResponse {
     url: string;
 }
 
-const API_URL = 'http://localhost:3001'; // Fallback to a default URL
+const API_URL = 'https://v1-designscout.onrender.com'; // Fallback to a default URL
 
 export const uploadImage = async (imageBlob: Blob): Promise<UploadResponse> => {
         const formData = new FormData();
