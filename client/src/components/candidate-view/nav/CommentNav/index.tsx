@@ -12,8 +12,6 @@ export default function CommentNav() {
     return elapsedMinutes;
   };
 
-  console.log(commentData)
-
   return (
     <div className={styles.commentNav}>
       

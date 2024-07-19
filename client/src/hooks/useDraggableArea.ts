@@ -43,10 +43,6 @@ export function useDraggableArea() {
         setRectangles(commentData.data.find(item => item.index === currentQuestion)?.commentData || [])
     }, [currentQuestion]);
 
-    useEffect(()=> {
-        console.log(rectangles, commentData)
-    }, [rectangles, commentData])
-
     const onMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLElement;
         const inputArea = target.closest('.input-area') // Assuming you add a class to identify input areas
