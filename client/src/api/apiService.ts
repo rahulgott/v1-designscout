@@ -4,17 +4,25 @@ interface UploadResponse {
     url: string;
 }
 
-const API_URL = 'https://v1-designscout.onrender.com'; // Fallback to a default URL
+const API_URL = 'https://v1-designscout.onrender.com'; 
 
 export const uploadImage = async (imageBlob: Blob): Promise<UploadResponse> => {
         const formData = new FormData();
-        formData.append('file', imageBlob); 
-
+        formData.append('file', imageBlob);
+    
         try {
-                const response: AxiosResponse<UploadResponse> = await axios.post(`${API_URL}/api/s3/upload`, formData); 
-                return response.data; // Contains URL or other response info
+            const response: AxiosResponse<UploadResponse> = await axios({
+                method: 'post',
+                url: `${API_URL}/api/s3/upload`,
+                data: formData,
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
         } catch (error) {
-                console.error('Error uploading file:', error);
-                throw error; // Optionally re-throw for further handling
+            console.error('Error uploading file:', error);
+            throw error;
         }
-};
+    };
+    
