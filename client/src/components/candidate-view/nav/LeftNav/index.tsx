@@ -1,6 +1,6 @@
 import styles from './styles.module.css';
 import { LeftNavProps } from '../../../../interfaces/types';
-import DropdownMenu from '../../../ui/DropdownMenu';
+import DropdownMenu from '../../ui/DropdownMenu';
 import toggleMenuIcon from '../../../../../public/toggle-menu-icon.png';
 import { useQuestion } from '../../../../contexts/questionContext';
 

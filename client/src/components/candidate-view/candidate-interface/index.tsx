@@ -4,7 +4,7 @@ import { MockData } from '../../../interfaces/types'
 import styles from "./styles.module.css"
 import HeadingNav from '../nav/HeadingNav'
 import LeftNav from '../nav/LeftNav'
-import Timer from '../../ui/Timer'
+import Timer from '../ui/Timer'
 import CommentNav from '../nav/CommentNav'
 import { useQuestion } from '../../../contexts/questionContext'
 import ToolBarNav from '../nav/ToolBarNav'
