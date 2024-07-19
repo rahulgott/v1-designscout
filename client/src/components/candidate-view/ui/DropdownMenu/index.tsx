@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import styles from './styles.module.css'
-import miniLogo from '../../../../src/assets/design-scout-mini-logo.png'
+import miniLogo from '../../../../../public/mini-logo.png'
 
 export default function DropdownMenu() {
     const [isOpen, setIsOpen] = useState(false)

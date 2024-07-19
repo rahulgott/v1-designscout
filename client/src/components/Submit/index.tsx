@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import Button from '../ui/Button'
 import styles from './styles.module.css'
 
 export default function Submit() {
@@ -11,9 +10,7 @@ export default function Submit() {
         </div>
         
         <div className={styles.backButton}>
-            <Link to="/">
-                <Button text={"Back"} size={"md"} color={"secondary"}/>
-            </Link>
+            <button>Back</button>
         </div>
     </div>
   )

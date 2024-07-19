@@ -1,0 +1,15 @@
+.headingNav {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 1rem 4rem;
+        background-color: white;
+        border-radius: 12px;
+        color: black;
+        position: fixed;
+        top: 1rem;
+        left: 50%;
+        transform: translate(-50%);
+        user-select: none;
+}
