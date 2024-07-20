@@ -4,7 +4,7 @@ interface UploadResponse {
     url: string;
 }
 
-const API_URL = 'https://v1-designscout.onrender.com'; 
+const API_URL = (window.location.hostname === 'localhost') ? 'http://localhost:3001' : 'https://v1-designscout.onrender.com'; 
 
 export const uploadImage = async (imageBlob: Blob): Promise<UploadResponse> => {
         const formData = new FormData();
