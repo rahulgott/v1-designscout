@@ -3,42 +3,56 @@ import { LeftNavProps } from '../../../../interfaces/types';
 import DropdownMenu from '../../ui/DropdownMenu';
 import toggleMenuIcon from '../../../../../public/toggle-menu-icon.png';
 import { useQuestion } from '../../../../contexts/questionContext';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function LeftNav({ assessmentInfo }: LeftNavProps) {
-  const { currentQuestion, setCurrentQuestion } = useQuestion();
+export default function LeftNav({ productBrief, questions }: LeftNavProps) {
+  const navigate = useNavigate()
+  
+  const { currentQuestion, setCurrentQuestion } = useQuestion()
+  
+  const [toggleToMinimize, setToggleToMinimize] = useState(false) 
 
   const handleNext = () => {
-    if (currentQuestion < assessmentInfo.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1)
     }
-  };
+  }
 
   const handleBack = () => {
-      if (currentQuestion > 0) {
-          setCurrentQuestion(currentQuestion - 1);
-      }
-  };
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1)
+    }
+  }
+
+  const handleSubmit = () => {
+    navigate('/submit');
+  }
 
   return (
-    <div className={styles.leftNav}>
+    <div className={`${styles.leftNav} ${toggleToMinimize ? styles.leftNavCollapsed : null}`}>
       <div className={styles.toggleSection}>
         <DropdownMenu />
-        <div className={styles.toggleMenuIcon}>
+        <button 
+          className={`${styles.toggleMenuIcon} ${toggleToMinimize ? styles.toggleMenuActive : null}`} 
+          onClick={() => {
+            setToggleToMinimize(!toggleToMinimize)
+          }}>
           <img src={toggleMenuIcon} alt="" />
-        </div>
+        </button>
       </div>
-      <div className={styles.assessmentInfo}>
+      <div className={styles.questions}>
         <div className={styles.questionsSection}>
-          <h2>{assessmentInfo[currentQuestion].question}</h2>
-          {assessmentInfo.length > 0 && (
+          <h2>{questions[currentQuestion].question}</h2>
+          {questions.length > 0 && (
             <div className={styles.buttonContainer}>
               <button onClick={handleBack} disabled={currentQuestion === 0}>
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M11.25 13.5L6.75 9L11.25 4.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-              <button onClick={handleNext} disabled={currentQuestion === assessmentInfo.length - 1}>
-                Next
+              <button onClick={(currentQuestion === questions.length - 1) ? handleSubmit : handleNext}>
+                {(currentQuestion === questions.length - 1) ? "Submit" : "Next"}
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M6.75 13.5L11.25 9L6.75 4.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -46,18 +60,18 @@ export default function LeftNav({ assessmentInfo }: LeftNavProps) {
             </div>
           )}
         </div>
-        <div className={styles.briefSection}>
+        {!toggleToMinimize && <div className={styles.briefSection}>
           <h3>Product Brief</h3>
           <div>
             <h4>Background</h4>
-            {assessmentInfo[currentQuestion].productBrief.background.map((item, index) => (
+            {productBrief.background.map((item, index) => (
               <p key={index}>{item}</p>
             ))}
           </div>
           <div>
             <h4>Target Users</h4>
             <ul>
-              {assessmentInfo[currentQuestion].productBrief.targetUsers.map((item, index) => (
+              {productBrief.targetUsers.map((item, index) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
@@ -65,7 +79,7 @@ export default function LeftNav({ assessmentInfo }: LeftNavProps) {
           <div>
             <h4>Business Goals</h4>
             <ul>
-              {assessmentInfo[currentQuestion].productBrief.businessGoals.map((item, index) => (
+              {productBrief.businessGoals.map((item, index) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
@@ -73,12 +87,12 @@ export default function LeftNav({ assessmentInfo }: LeftNavProps) {
           <div>
             <h4>Challenges</h4>
             <ul>
-              {assessmentInfo[currentQuestion].productBrief.challenges.map((item, index) => (
+              {productBrief.challenges.map((item, index) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

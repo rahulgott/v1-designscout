@@ -71,4 +71,21 @@
                         }
                 }
         }
+             
+        /* width */
+        ::-webkit-scrollbar {
+                width: 10px;
+        }
+        
+        /* Track */
+        ::-webkit-scrollbar-track {
+                background: lightgrey;
+        }
+        
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+                background: #ffffff;
+                border-radius: 10px;
+                border: 1px solid grey;
+        }
 }

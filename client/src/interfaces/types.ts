@@ -1,13 +1,13 @@
 export interface MockData {
     assessmentName: string,
     timeLimit: number,
-    assessmentInfo: AssessmentInfo[],
+    questions: Question[],
+    productBrief: ProductBrief,
     comments: any
 }
 
-export interface AssessmentInfo {
+export interface Question {
     question: string,
-    productBrief: ProductBrief,
     imageMockup: string,
 }
 
@@ -19,7 +19,8 @@ export interface ProductBrief {
 }
 
 export interface LeftNavProps {
-    assessmentInfo: AssessmentInfo[];
+    productBrief: ProductBrief,
+    questions: Question[]
 }
 
 export interface Comment {
