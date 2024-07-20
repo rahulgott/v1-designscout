@@ -9,13 +9,12 @@ const cors = require('cors')
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// const corsOptions = {
-//     origin: ['http://localhost:5173', 'https://designscout-v1.netlify.app'],
-//     optionsSuccessStatus: 200
-// };
+const corsOptions = {
+    origin: ['http://localhost:5173', 'https://designscout-v1.netlify.app'],
+    optionsSuccessStatus: 200
+};
 
-// app.use(cors(corsOptions));
-app.use(cors())
+app.use(cors(corsOptions));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

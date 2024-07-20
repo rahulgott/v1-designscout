@@ -4,7 +4,8 @@
     align-items: center;
     height: 100%;
     width: 100%;
-
+    cursor: crosshair;
+    
     .imageContainer {
         display: flex;
         overflow: hidden;
@@ -13,6 +14,7 @@
         padding: 0.5rem;
         background-color: rgba(255, 255, 255, 0.5);
         border-radius: 6px;
+        cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAhCAYAAABX5MJvAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEzSURBVHgB7ZUxTsMwFIbfS3IAj2ULG2y9AfQmuQHcgHICxA3gBr0B4QSkC4KJLEiwvZEuDb/bWGqVSK3jV7WDv8WJLed9svPeY1LCjC6uMeQeW2r5+SjtA5MCEJhiuCNfmqaixWKSUiAQKDA80BCYR5RlfwmFc0VhFBoSwUQJR5RwRAnH8SUaFg2JZwpiWXpJmLPLN5Tpl825tglNaRglese9VwODwFcb+LxnLUcvuEFTut1aYJ5hbtb5WJrM5fu9so8ZKQGxGiLzrUkIYf5x1141iRVpUtGyEQQXvBXy+/m6zzZVCXu8xuSrqxKpZd99uifhGdxxEsWqkx02DXGnYxpGiR9xQp50r2OdTv1HyjzGurHBetf7UlEbWydcrdAkNjBHlHCchIRvxXxq+0IkclD+AR4iYYPjxWH4AAAAAElFTkSuQmCC") 12 20, auto;
         
         img {
             width: auto;
