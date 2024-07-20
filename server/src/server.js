@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 const corsOptions = {
-    origin: 'https://designscout-v1.netlify.app',
+    origin: ['http://localhost:5173', 'https://designscout-v1.netlify.app'],
     optionsSuccessStatus: 200
 };
 
