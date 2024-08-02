@@ -1,12 +1,12 @@
-import 'regenerator-runtime/runtime';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import Submit from './components/candidate-view/Submit/index.tsx';
+import "regenerator-runtime/runtime"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import React from "react"
+import ReactDOM from "react-dom/client"
+import App from "./App.tsx"
+import "./index.css"
+import Submit from "./components/candidate-view/Submit/index.tsx"
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Router>
       <Routes>
@@ -14,5 +14,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/submit" element={<Submit />} />
       </Routes>
     </Router>
-  </React.StrictMode>,
+  </React.StrictMode>
 )

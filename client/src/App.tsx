@@ -1,13 +1,12 @@
-import './App.css'
-import CandidateInterface from './components/candidate-view/candidate-interface'
-import { QuestionProvider } from './contexts/questionContext'
+import "./App.css"
+import CandidateInterface from "./components/candidate-view/candidate-interface"
+import { QuestionProvider } from "./contexts/questionContext"
 
 function App() {
-
   return (
-    <div style={{height: "100svh"}}>
+    <div style={{ height: "100svh" }}>
       <QuestionProvider>
-        < CandidateInterface />
+        <CandidateInterface />
       </QuestionProvider>
     </div>
   )
