@@ -16,7 +16,6 @@ import { AppDispatch, RootState } from "../store"
 
 export function useDraggableArea() {
   const dispatch = useDispatch<AppDispatch>()
-
   const {
     inputVisible,
     inputPosition,
@@ -27,7 +26,6 @@ export function useDraggableArea() {
     commentData,
   } = useSelector((state: RootState) => state.clientFlow)
 
-  const [rectangles, setRectangles] = useState<Comment[]>([])
   const [currentRect, setCurrentRect] = useState<Comment | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [startPosition, setStartPosition] = useState<{
@@ -58,12 +56,7 @@ export function useDraggableArea() {
       }
       dispatch(setCommentData(newCommentData))
     }
-    // Update rectangles from the Redux store to ensure they are in sync
-    setRectangles(
-      commentData.data.find((item) => item.index === currentQuestion)
-        ?.commentData || []
-    )
-  }, [currentQuestion, commentData, rectangles, dispatch])
+  }, [currentQuestion, commentData, dispatch])
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -171,31 +164,26 @@ export function useDraggableArea() {
       ) {
         takeScreenshot()
 
-        const updatedRectangles = [
-          ...rectangles,
-          {
-            ...currentRect,
-            x: Math.min(startPosition.x, mouseX),
-            y: Math.min(startPosition.y, mouseY),
-            width: Math.abs(mouseX - startPosition.x),
-            height: Math.abs(mouseY - startPosition.y),
-            comment: inputValue,
-            lastUpdated: Date.now(),
-          },
-        ]
+        const updatedRectangle = {
+          ...currentRect,
+          x: Math.min(startPosition.x, mouseX),
+          y: Math.min(startPosition.y, mouseY),
+          width: Math.abs(mouseX - startPosition.x),
+          height: Math.abs(mouseY - startPosition.y),
+          comment: inputValue,
+          lastUpdated: Date.now(),
+        }
 
         dispatch(
           setCommentData({
             ...commentData,
             data: commentData.data.map((d) =>
               d.index === currentQuestion
-                ? { ...d, commentData: updatedRectangles }
+                ? { ...d, commentData: [...d.commentData, updatedRectangle] }
                 : d
             ),
           })
         )
-
-        setRectangles(updatedRectangles)
 
         dispatch(
           setSelectedRectIndex(
@@ -223,8 +211,6 @@ export function useDraggableArea() {
       commentData,
       rectIndex,
       setRectIndex,
-      rectangles,
-      setRectangles,
       dispatch,
     ]
   )
@@ -279,30 +265,27 @@ export function useDraggableArea() {
   const submitComment = useCallback(
     (inputValue: string) => {
       if (inputValue.trim() !== "" && selectedRectIndex !== null) {
-        // Directly update the local rectangles array
-        const updatedRectangles = rectangles.map((rect, index) => {
-          if (index === selectedRectIndex) {
-            return {
-              ...rect,
-              comment: inputValue,
-              time: Date.now(),
-              imageUrl: imageUploaded ? recentImageUrl : rect.imageUrl,
-            }
-          }
-          return rect
-        })
-
-        // Update the local state for rectangles
-        setRectangles(updatedRectangles)
-
-        // Prepare updated comment data for Redux
+        // Directly find and update the rectangle in the Redux state
         const updatedCommentData = {
           ...commentData,
-          data: commentData.data.map((item) =>
-            item.index === currentQuestion
-              ? { ...item, commentData: updatedRectangles }
-              : item
-          ),
+          data: commentData.data.map((item) => {
+            if (item.index === currentQuestion) {
+              // Map through the commentData to find and update the specific rectangle
+              const updatedCommentData = item.commentData.map((rect, index) => {
+                if (index === selectedRectIndex) {
+                  return {
+                    ...rect,
+                    comment: inputValue,
+                    time: Date.now(),
+                    imageUrl: imageUploaded ? recentImageUrl : rect.imageUrl,
+                  }
+                }
+                return rect
+              })
+              return { ...item, commentData: updatedCommentData }
+            }
+            return item
+          }),
         }
 
         // Dispatch updated comment data to Redux
@@ -317,13 +300,11 @@ export function useDraggableArea() {
     },
     [
       dispatch,
-      rectangles,
-      selectedRectIndex,
       commentData,
+      selectedRectIndex,
       currentQuestion,
       imageUploaded,
       recentImageUrl,
-      setRectangles,
       setInputVisible,
       setCurrentRect,
       setImageUploaded,
