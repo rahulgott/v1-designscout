@@ -1,8 +1,14 @@
 import styles from "./styles.module.css"
-import { useSelector } from "react-redux"
-import { RootState } from "../../../../store"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "../../../../store"
+import {
+  setCurrentQuestion,
+  setSelectedRectIndex,
+  setViewCommentOnClick,
+} from "../../../../features/clientFlow/clientFlowSlice"
 
 export default function CommentNav() {
+  const dispatch = useDispatch<AppDispatch>()
   const { commentData } = useSelector((state: RootState) => state.clientFlow)
 
   const calculateElapsedMinutes = (startTime: number) => {
@@ -10,6 +16,13 @@ export default function CommentNav() {
     const elapsedMilliseconds = currentTime - startTime
     const elapsedMinutes = Math.floor(elapsedMilliseconds / (1000 * 60))
     return elapsedMinutes
+  }
+
+  function openSelectedComment(index: number, selectedQuestion: number) {
+    console.log(index)
+    dispatch(setCurrentQuestion(selectedQuestion))
+    dispatch(setSelectedRectIndex(index))
+    dispatch(setViewCommentOnClick(true))
   }
 
   return (
@@ -43,7 +56,11 @@ export default function CommentNav() {
                 <div key={index} className={styles.commentModule}>
                   <h4>Question {entry.index + 1}:</h4>
                   {entry.commentData.map((comment, innerIndex) => (
-                    <div key={innerIndex} className={styles.commentEntry}>
+                    <div
+                      key={innerIndex}
+                      className={styles.commentEntry}
+                      onClick={() => openSelectedComment(innerIndex, index)}
+                    >
                       {comment.imageUrl && (
                         <div className={styles.imgAndTimeContainer}>
                           <div className={styles.imageDiv}>
