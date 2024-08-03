@@ -5,10 +5,26 @@ import { useDraggableArea } from "../../../hooks/useDraggableArea"
 import styles from "./styles.module.css"
 import { useRef, useEffect } from "react"
 import ViewComment from "../ui/ViewComment"
-import { useQuestion } from "../../../contexts/questionContext"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "../../../store"
+import {
+  setInputValue,
+  setInputVisible,
+  setSelectedRectIndex,
+  setViewCommentOnClick,
+} from "../../../features/clientFlow/clientFlowSlice"
 
 export default function CanvasArea({ imageMockup }: { imageMockup: string }) {
-  const { currentQuestion, commentData } = useQuestion()
+  const dispatch = useDispatch<AppDispatch>()
+  const {
+    inputVisible,
+    inputPosition,
+    inputValue,
+    selectedRectIndex,
+    viewCommentOnClick,
+    currentQuestion,
+    commentData,
+  } = useSelector((state: RootState) => state.clientFlow)
 
   const {
     currentRect,
@@ -17,16 +33,7 @@ export default function CanvasArea({ imageMockup }: { imageMockup: string }) {
     onMouseMove,
     onMouseUp,
     submitComment,
-    inputValue,
-    setInputValue,
     screenshotRef,
-    viewCommentOnClick,
-    setViewCommentOnClick,
-    selectedRectIndex,
-    setSelectedRectIndex,
-    inputVisible,
-    setInputVisible,
-    inputPosition,
   } = useDraggableArea()
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
@@ -46,7 +53,7 @@ export default function CanvasArea({ imageMockup }: { imageMockup: string }) {
 
   useEffect(() => {
     if (listening) {
-      setInputValue(transcript)
+      dispatch(setInputValue(transcript))
     }
   }, [transcript])
 
@@ -58,7 +65,8 @@ export default function CanvasArea({ imageMockup }: { imageMockup: string }) {
   }, [inputValue])
 
   useEffect(() => {
-    setInputVisible(false)
+    dispatch(setInputVisible(false))
+    dispatch(setViewCommentOnClick(false))
     setCurrentRect(null)
   }, [currentQuestion])
 
@@ -84,8 +92,8 @@ export default function CanvasArea({ imageMockup }: { imageMockup: string }) {
           {
             <div
               onClick={() => {
-                setSelectedRectIndex(index)
-                setViewCommentOnClick(true)
+                dispatch(setSelectedRectIndex(index))
+                dispatch(setViewCommentOnClick(true))
               }}
               style={{
                 position: "absolute",
@@ -142,15 +150,15 @@ export default function CanvasArea({ imageMockup }: { imageMockup: string }) {
               if (inputValue) {
                 submitComment(inputValue)
               }
-              setInputVisible(false)
-              setInputValue("")
+              dispatch(setInputVisible(false))
+              dispatch(setInputValue(""))
             }}
           >
             <textarea
               ref={textAreaRef}
               className="input-class-name"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => dispatch(setInputValue(e.target.value))}
               placeholder="What do you think?"
               autoFocus
               style={{

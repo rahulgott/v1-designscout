@@ -2,11 +2,31 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import SpeechRecognition from "react-speech-recognition"
 import { toPng } from "html-to-image"
 import { uploadImage } from "../api/apiService"
-import { Comment } from "../interfaces/types"
-import { useQuestion } from "../contexts/questionContext"
+import { Comment, MockCommentData } from "../interfaces/types"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  setCommentData,
+  setInputPosition,
+  setInputValue,
+  setInputVisible,
+  setSelectedRectIndex,
+  setViewCommentOnClick,
+} from "../features/clientFlow/clientFlowSlice"
+import { AppDispatch, RootState } from "../store"
 
 export function useDraggableArea() {
-  const { currentQuestion, commentData, setCommentData } = useQuestion()
+  const dispatch = useDispatch<AppDispatch>()
+
+  const {
+    inputVisible,
+    inputPosition,
+    inputValue,
+    selectedRectIndex,
+    viewCommentOnClick,
+    currentQuestion,
+    commentData,
+  } = useSelector((state: RootState) => state.clientFlow)
+
   const [rectangles, setRectangles] = useState<Comment[]>([])
   const [currentRect, setCurrentRect] = useState<Comment | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -18,40 +38,32 @@ export function useDraggableArea() {
     x: number
     y: number
   } | null>(null)
-  const [inputVisible, setInputVisible] = useState(false)
-  const [inputPosition, setInputPosition] = useState({ x: 0, y: 0 })
   const [rectIndex, setRectIndex] = useState<number>(0)
-  const [selectedRectIndex, setSelectedRectIndex] = useState<number | null>(
-    null
-  )
-  const [inputValue, setInputValue] = useState("")
   const [imageUploaded, setImageUploaded] = useState(false)
   const [recentImageUrl, setRecentImageUrl] = useState<string | null>()
-  const [viewCommentOnClick, setViewCommentOnClick] = useState<boolean>(false)
-
   const screenshotRef = useRef<HTMLDivElement>(null)
   const devicePixelRatio = window.devicePixelRatio || 1
 
   useEffect(() => {
-    // Initialize comment data for the current question if it doesn't exist
-    setCommentData((prev) => {
-      const existingData = prev.data.find(
-        (item: { index: number }) => item.index === currentQuestion
-      )
-      if (!existingData) {
-        return {
-          ...prev,
-          data: [...prev.data, { index: currentQuestion, commentData: [] }],
-        }
+    const existingIndex = commentData.data.findIndex(
+      (item) => item.index === currentQuestion
+    )
+    if (existingIndex === -1) {
+      const newCommentData: MockCommentData = {
+        ...commentData,
+        data: [
+          ...commentData.data,
+          { index: currentQuestion, commentData: [] },
+        ],
       }
-      return prev
-    })
-
+      dispatch(setCommentData(newCommentData))
+    }
+    // Update rectangles from the Redux store to ensure they are in sync
     setRectangles(
       commentData.data.find((item) => item.index === currentQuestion)
         ?.commentData || []
     )
-  }, [currentQuestion])
+  }, [currentQuestion, commentData, rectangles, dispatch])
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -60,7 +72,7 @@ export function useDraggableArea() {
       const viewCommentArea = target.closest("view-comment-area")
 
       if (!viewCommentArea) {
-        setViewCommentOnClick(false)
+        dispatch(setViewCommentOnClick(false))
       }
       // Click is outside and input is visible
       if (!inputArea) {
@@ -70,16 +82,27 @@ export function useDraggableArea() {
           } else {
             // Optionally handle empty input cases, e.g., removing an unfinished rectangle
             if (selectedRectIndex != null) {
-              setRectangles((prev) =>
-                prev.filter((_, index) => index !== selectedRectIndex)
-              )
+              const updatedCommentData = {
+                ...commentData,
+                data: commentData.data.map((item) =>
+                  item.index === currentQuestion
+                    ? {
+                        ...item,
+                        commentData: item.commentData.filter(
+                          (_, idx) => idx !== selectedRectIndex
+                        ),
+                      }
+                    : item
+                ),
+              }
+              dispatch(setCommentData(updatedCommentData))
             }
           }
 
-          setInputVisible(false)
+          dispatch(setInputVisible(false))
           setCurrentRect(null)
-          setInputValue("")
-          setSelectedRectIndex(null)
+          dispatch(setInputValue(""))
+          dispatch(setSelectedRectIndex(null))
         } else {
           const rect = e.currentTarget.getBoundingClientRect()
           const scrollTop =
@@ -100,7 +123,7 @@ export function useDraggableArea() {
         }
       }
     },
-    [inputVisible, inputValue, setInputVisible, setInputValue]
+    [inputVisible, inputValue, setInputVisible, setInputValue, dispatch]
   )
 
   const onMouseMove = useCallback(
@@ -136,51 +159,58 @@ export function useDraggableArea() {
 
   const onMouseUp = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      let draggedWidth: number = 0
-      let draggedHeight: number = 0
+      const rect = e.currentTarget.getBoundingClientRect()
+      const mouseX = e.clientX - rect.left
+      const mouseY = e.clientY - rect.top
 
-      if (startPosition && endPosition) {
-        draggedWidth = Math.abs(startPosition.x - endPosition.x)
-        draggedHeight = Math.abs(startPosition.y - endPosition.y)
-      }
-      if (currentRect && draggedWidth > 12 && draggedHeight > 12) {
-        setEndPosition({
-          x: currentRect.x + currentRect.width,
-          y: currentRect.y + currentRect.height,
-        })
-
+      if (
+        currentRect &&
+        startPosition &&
+        Math.abs(mouseX - startPosition.x) > 12 &&
+        Math.abs(mouseY - startPosition.y) > 12
+      ) {
         takeScreenshot()
 
-        setRectangles((prev) => [
-          ...prev,
+        const updatedRectangles = [
+          ...rectangles,
           {
             ...currentRect,
+            x: Math.min(startPosition.x, mouseX),
+            y: Math.min(startPosition.y, mouseY),
+            width: Math.abs(mouseX - startPosition.x),
+            height: Math.abs(mouseY - startPosition.y),
             comment: inputValue,
-            index: prev.length,
-            displayOrder: prev.length,
+            lastUpdated: Date.now(),
           },
-        ])
+        ]
 
-        setCommentData((prev) => {
-          const updatedData = prev.data.map((item) => {
-            if (item.index === currentQuestion) {
-              return { ...item, commentData: rectangles }
-            }
-            return item
+        dispatch(
+          setCommentData({
+            ...commentData,
+            data: commentData.data.map((d) =>
+              d.index === currentQuestion
+                ? { ...d, commentData: updatedRectangles }
+                : d
+            ),
           })
-          return { ...prev, data: updatedData }
-        })
-
-        setSelectedRectIndex(
-          commentData.data[currentQuestion].commentData.length
         )
 
-        setInputPosition({
-          x: e.clientX - e.currentTarget.getBoundingClientRect().left,
-          y: e.clientY - e.currentTarget.getBoundingClientRect().top,
-        })
-        setInputVisible(true)
-        setInputValue("") // Clear input after setting
+        setRectangles(updatedRectangles)
+
+        dispatch(
+          setSelectedRectIndex(
+            commentData.data[currentQuestion].commentData.length
+          )
+        )
+
+        dispatch(
+          setInputPosition({
+            x: e.clientX - e.currentTarget.getBoundingClientRect().left,
+            y: e.clientY - e.currentTarget.getBoundingClientRect().top,
+          })
+        )
+        dispatch(setInputVisible(true))
+        dispatch(setInputValue("")) // Clear input after setting
       }
       setIsDragging(false)
       setStartPosition(null)
@@ -189,8 +219,13 @@ export function useDraggableArea() {
     [
       currentRect,
       inputValue,
-      commentData?.data[currentQuestion]?.commentData?.length,
+      setInputValue,
+      commentData,
       rectIndex,
+      setRectIndex,
+      rectangles,
+      setRectangles,
+      dispatch,
     ]
   )
 
@@ -239,55 +274,60 @@ export function useDraggableArea() {
     } else {
       throw new Error("Failed to get drawing context from canvas")
     }
-    console.log("currentQuestion while taking screenshot: ", currentQuestion)
   }, [screenshotRef, currentRect, startPosition, endPosition, devicePixelRatio])
 
   const submitComment = useCallback(
     (inputValue: string) => {
-      if (inputValue.trim() !== "" && selectedRectIndex != null) {
-        setRectangles((prev) => {
-          const updatedRectangles = prev.map((rect, index) => {
-            if (index === selectedRectIndex) {
-              const newRect = { ...rect, comment: inputValue, time: Date.now() }
-
-              if (imageUploaded && recentImageUrl) {
-                newRect.imageUrl = recentImageUrl
-              }
-              return newRect
+      if (inputValue.trim() !== "" && selectedRectIndex !== null) {
+        // Directly update the local rectangles array
+        const updatedRectangles = rectangles.map((rect, index) => {
+          if (index === selectedRectIndex) {
+            return {
+              ...rect,
+              comment: inputValue,
+              time: Date.now(),
+              imageUrl: imageUploaded ? recentImageUrl : rect.imageUrl,
             }
-            return rect
-          })
-
-          // Here we use the updated rectangles
-          setCommentData((prev) => {
-            const updatedData = prev.data.map(
-              (dataItem: { index: number; commentData: any[] }) => {
-                // Check if current data item is for the current question
-                if (dataItem.index === currentQuestion) {
-                  return { ...dataItem, commentData: updatedRectangles }
-                }
-                return dataItem
-              }
-            )
-
-            return { ...prev, data: updatedData }
-          })
-
-          return updatedRectangles
+          }
+          return rect
         })
 
-        setInputVisible(false)
+        // Update the local state for rectangles
+        setRectangles(updatedRectangles)
+
+        // Prepare updated comment data for Redux
+        const updatedCommentData = {
+          ...commentData,
+          data: commentData.data.map((item) =>
+            item.index === currentQuestion
+              ? { ...item, commentData: updatedRectangles }
+              : item
+          ),
+        }
+
+        // Dispatch updated comment data to Redux
+        dispatch(setCommentData(updatedCommentData))
+
+        // Reset UI related states
+        dispatch(setInputVisible(false))
         setCurrentRect(null)
-        setImageUploaded(false) // Reset the flag
-        setInputValue("") // Clear the input
+        setImageUploaded(false)
+        dispatch(setInputValue("")) // Clear the input field after submitting
       }
     },
     [
-      inputValue,
+      dispatch,
+      rectangles,
+      selectedRectIndex,
+      commentData,
+      currentQuestion,
       imageUploaded,
       recentImageUrl,
-      selectedRectIndex,
-      currentQuestion,
+      setRectangles,
+      setInputVisible,
+      setCurrentRect,
+      setImageUploaded,
+      setInputValue,
     ]
   )
 
@@ -295,17 +335,25 @@ export function useDraggableArea() {
     (index: number) => {
       const rect = commentData.data[currentQuestion].commentData[index]
       if (rect) {
-        setViewCommentOnClick(false)
-        setInputPosition({
-          x: +rect.x + +rect.width,
-          y: +rect.y + +rect.height,
-        })
-        setInputVisible(true)
-        setSelectedRectIndex(index)
-        setInputValue(rect.comment) // Set inputValue when an existing rectangle is clicked
+        dispatch(setViewCommentOnClick(false))
+        dispatch(
+          setInputPosition({
+            x: +rect.x + +rect.width,
+            y: +rect.y + +rect.height,
+          })
+        )
+        dispatch(setInputVisible(true))
+        dispatch(setSelectedRectIndex(index))
+        dispatch(setInputValue(rect.comment)) // Set inputValue when an existing rectangle is clicked
       }
     },
-    [commentData?.data[currentQuestion]?.commentData]
+    [
+      commentData,
+      setInputVisible,
+      setInputValue,
+      setSelectedRectIndex,
+      dispatch,
+    ]
   )
 
   return {

@@ -5,12 +5,15 @@ import HeadingNav from "../nav/HeadingNav"
 import LeftNav from "../nav/LeftNav"
 import Timer from "../ui/Timer"
 import CommentNav from "../nav/CommentNav"
-import { useQuestion } from "../../../contexts/questionContext"
 import ToolBarNav from "../nav/ToolBarNav"
 import InstructionsNav from "../nav/Instructions"
+import { useSelector } from "react-redux"
+import { RootState } from "../../../store"
 
 export default function CandidateInterface() {
-  const { currentQuestion } = useQuestion()
+  const { currentQuestion } = useSelector(
+    (state: RootState) => state.clientFlow
+  )
 
   const mockData: MockData = {
     assessmentName: "AirBnB Product Design Intern Assessment",

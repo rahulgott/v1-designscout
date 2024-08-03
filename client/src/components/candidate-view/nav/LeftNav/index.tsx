@@ -2,26 +2,30 @@ import styles from "./styles.module.css"
 import { LeftNavProps } from "../../../../interfaces/types"
 import DropdownMenu from "../../ui/DropdownMenu"
 import toggleMenuIcon from "../../../../../public/toggle-menu-icon.png"
-import { useQuestion } from "../../../../contexts/questionContext"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "../../../../store"
+import { setCurrentQuestion } from "../../../../features/clientFlow/clientFlowSlice"
 
 export default function LeftNav({ productBrief, questions }: LeftNavProps) {
   const navigate = useNavigate()
-
-  const { currentQuestion, setCurrentQuestion } = useQuestion()
+  const dispatch = useDispatch<AppDispatch>()
+  const { currentQuestion } = useSelector(
+    (state: RootState) => state.clientFlow
+  )
 
   const [toggleToMinimize, setToggleToMinimize] = useState(false)
 
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
+      dispatch(setCurrentQuestion(currentQuestion + 1))
     }
   }
 
   const handleBack = () => {
     if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1)
+      dispatch(setCurrentQuestion(currentQuestion - 1))
     }
   }
 

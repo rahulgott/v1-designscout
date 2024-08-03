@@ -30,7 +30,7 @@ export interface Comment {
   y: number
   width: number
   height: number
-  imageUrl: string
+  imageUrl?: string | null
   comment: string
   lastUpdated: number
 }

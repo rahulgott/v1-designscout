@@ -1,8 +1,9 @@
 import styles from "./styles.module.css"
-import { useQuestion } from "../../../../contexts/questionContext"
+import { useSelector } from "react-redux"
+import { RootState } from "../../../../store"
 
 export default function CommentNav() {
-  const { commentData } = useQuestion()
+  const { commentData } = useSelector((state: RootState) => state.clientFlow)
 
   const calculateElapsedMinutes = (startTime: number) => {
     const currentTime = Date.now()

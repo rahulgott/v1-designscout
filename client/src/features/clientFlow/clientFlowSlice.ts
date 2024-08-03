@@ -3,6 +3,7 @@ import { MockCommentData } from "../../interfaces/types"
 
 interface ClientState {
   inputVisible: boolean
+  inputValue: string
   inputPosition: { x: number; y: number }
   selectedRectIndex: number | null
   viewCommentOnClick: boolean
@@ -13,6 +14,7 @@ interface ClientState {
 
 const initialState: ClientState = {
   inputVisible: false,
+  inputValue: "",
   inputPosition: { x: 0, y: 0 },
   selectedRectIndex: null,
   viewCommentOnClick: false,
@@ -37,6 +39,9 @@ const clientFlowSlice = createSlice({
     setInputVisible(state, action: PayloadAction<boolean>) {
       state.inputVisible = action.payload
     },
+    setInputValue(state, action: PayloadAction<string>) {
+      state.inputValue = action.payload
+    },
     setInputPosition(state, action: PayloadAction<{ x: number; y: number }>) {
       state.inputPosition = action.payload
     },
@@ -60,6 +65,7 @@ const clientFlowSlice = createSlice({
 
 export const {
   setInputVisible,
+  setInputValue,
   setInputPosition,
   setSelectedRectIndex,
   setViewCommentOnClick,
@@ -67,4 +73,5 @@ export const {
   setCommentData,
   setCurrentScale,
 } = clientFlowSlice.actions
+
 export default clientFlowSlice.reducer

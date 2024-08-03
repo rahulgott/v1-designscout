@@ -1,6 +1,9 @@
 import { useState } from "react"
 import styles from "./styles.module.css"
 import { useDraggableArea } from "../../../../hooks/useDraggableArea"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "../../../../store"
+import { setCommentData } from "../../../../features/clientFlow/clientFlowSlice"
 
 export default function ViewComment({
   index,
@@ -9,12 +12,38 @@ export default function ViewComment({
   index: number
   data: any
 }) {
+  const dispatch = useDispatch<AppDispatch>()
+  const { currentQuestion, commentData } = useSelector(
+    (state: RootState) => state.clientFlow
+  )
+
   const [openCrudOptions, setOpenCrudOptions] = useState(false)
 
   const { showInputOnClick } = useDraggableArea()
 
   function editComment(index: number) {
     showInputOnClick(index)
+  }
+
+  function deleteComment(index: number) {
+    // Create a new array that excludes the comment at the given index
+    const updatedCommentData = commentData.data.map((item) => {
+      if (item.index === currentQuestion) {
+        return {
+          ...item,
+          commentData: item.commentData.filter((_, idx) => idx !== index),
+        }
+      }
+      return item
+    })
+
+    // Dispatch the updated comment data to the Redux store
+    dispatch(
+      setCommentData({
+        ...commentData,
+        data: updatedCommentData,
+      })
+    )
   }
 
   return (
@@ -55,7 +84,7 @@ export default function ViewComment({
       {openCrudOptions && (
         <div className={styles.crudOptions}>
           <p onClick={() => editComment(index)}>Edit</p>
-          <p>Delete</p>
+          <p onClick={() => deleteComment(index)}>Delete</p>
         </div>
       )}
       <p className={styles.comment}>{data.comment}</p>
